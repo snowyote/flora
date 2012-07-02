@@ -5,21 +5,70 @@
   <body>
     <script src="processing.js"></script>
     <script type="text/processing" data-processing-target="mycanvas">
-void setup()
-{
-  size(200,200);
-  background(125);
-  fill(255);
-  noLoop();
-  PFont fontA = loadFont("courier");
-  textFont(fontA, 14);  
+float theta;   
+
+void setup() {
+  size(640, 360);
+  smooth();
 }
 
-void draw(){  
-  text("Hello Web!",20,20);
-  println("Hello ErrorLog!");
+void draw() {
+  background(0);
+  frameRate(30);
+  stroke(255);
+  // Let's pick an angle 0 to 90 degrees based on the mouse position
+  float a = (mouseX / (float) width) * 90f;
+  // Convert it to radians
+  theta = radians(a);
+  // Start the tree from the bottom of the screen
+  translate(width/2,height);
+  // Draw a line 120 pixels
+  line(0,0,0,-120);
+  // Move to the end of that line
+  translate(0,-120);
+  // Start the recursive branching!
+  branch(120);
+
 }
-    </script>
+
+void forward(float dist) { line(0,0,0,-dist); translate(0, -dist); }
+void left() { rotate(-theta); }
+void right() { rotate(theta); }
+
+void branch(float l) {
+    // going by the plant example of an L-system on Wikipedia:
+    // http://en.wikipedia.org/wiki/L-system#Example_8:_Fractal_plant
+    //
+    // variables : X F
+    // constants : + − [ ]
+    // start  : X
+    // rules  : (X → F-[[X]+X]+F[+FX]-X), (F → FF)
+
+    // halve the length for each iteration: F -> FF
+    l *= 0.5;
+    // stop when our branches are only a couple pixels
+    if (l >= 2) {
+        forward(l);
+        left();
+        pushMatrix();
+        pushMatrix();
+        branch(l);
+        popMatrix();
+        right();
+        branch(l);
+        popMatrix();
+        right();
+        forward(l);
+        pushMatrix();
+        right();
+        forward(l);
+        branch(l);
+        popMatrix();
+        left();
+        branch(l);
+    }
+}
+</script>
     <canvas id="mycanvas"></canvas>
   </body>
 </html>
